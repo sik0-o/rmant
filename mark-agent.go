@@ -28,8 +28,7 @@ func (m *markAgent) Mark(key RedisKey) error {
 	return m.redis.Set(context.Background(), key.String(), m.conf.MarkValue, m.conf.MarkTTL).Err()
 }
 
-// Check implements MarkAgent.
-func (m *markAgent) Check(key RedisKey) (map[string]uint64, error) {
+func (m *markAgent) findKeys(key RedisKey) ([]string, error) {
 	var keys []string
 	ctx := context.Background()
 
@@ -38,10 +37,21 @@ func (m *markAgent) Check(key RedisKey) (map[string]uint64, error) {
 		keys = append(keys, iter.Val())
 	}
 	if err := iter.Err(); err != nil {
-		return nil, err
+		return keys, err
 	}
 
+	return keys, nil
+}
+
+// Check implements MarkAgent.
+func (m *markAgent) Check(key RedisKey) (map[string]uint64, error) {
 	points := map[string]uint64{}
+
+	keys, err := m.findKeys(key)
+	if err != nil {
+		return points, err
+	}
+
 	for _, k := range keys {
 		subj, ok := key.Parse(k)["entity"]
 		if !ok {
@@ -56,4 +66,13 @@ func (m *markAgent) Check(key RedisKey) (map[string]uint64, error) {
 	}
 
 	return points, nil
+}
+
+func (m *markAgent) Del(key RedisKey) error {
+	keys, err := m.findKeys(key)
+	if err != nil {
+		return err
+	}
+
+	return m.redis.Del(context.Background(), keys...).Err()
 }
