@@ -2,6 +2,7 @@ package rmant
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -51,6 +52,7 @@ func (m *markAgent) Check(key RedisKey) (map[string]uint64, error) {
 	if err != nil {
 		return points, err
 	}
+	fmt.Println("markAgent>", "keys", keys)
 
 	for _, k := range keys {
 		subj, ok := key.Parse(k)["entity"]
@@ -64,6 +66,7 @@ func (m *markAgent) Check(key RedisKey) (map[string]uint64, error) {
 		}
 		points[subj] = v + 1
 	}
+	fmt.Println("markAgent>", "points", points)
 
 	return points, nil
 }
