@@ -39,7 +39,7 @@ func (k *redisKey) Parse(key string) map[string]string {
 	// извлекаем префикс
 	m["prefix"] = k.prefix
 	// разбиваем оставшийся ключ по `:`
-	ka := strings.Split(key[len(k.prefix):], ":")
+	ka := strings.Split(key[len(k.prefix)+1:], ":")
 	// последний элемент - это uniq
 	m["uniq"] = ka[len(ka)-1]
 	// остальное entity
