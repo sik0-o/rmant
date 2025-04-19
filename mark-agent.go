@@ -73,6 +73,10 @@ func (m *markAgent) Del(key RedisKey) error {
 	if err != nil {
 		return err
 	}
+	// в Del нельзя пустые keys кинуть
+	if len(keys) == 0 {
+		return nil
+	}
 
 	return m.redis.Del(context.Background(), keys...).Err()
 }
